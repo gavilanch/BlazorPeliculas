@@ -1,0 +1,81 @@
+﻿@page "/"
+
+@*<p>Hola, @UtilidadesString.Enmayuscular(nombre)</p>
+
+<p>Vamos a sumar 2 + 2 = @(2 + 2)</p>
+
+<button @onclick="@ManejarClick">
+    Presioname
+</button>*@
+
+    <div>
+        <h3>Películas</h3>
+        @*@foreach (var pelicula in ObtenerPeliculas())
+        {
+            <div>
+                <p>Título: <b>@pelicula.Titulo</b></p>
+                <p>Fecha Lanzamiento: <b>@pelicula.Lanzamiento.ToString("dd MMM yyyy")</b></p>
+            </div>
+        }*@
+
+        @if (Peliculas == null)
+        {
+            <img src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif" />
+            <text>Cargando...</text>
+        }
+        else if (Peliculas.Count == 0)
+        {
+            <text>No hay registros para mostrar...</text>
+        }
+        else
+        {
+            @for (var i = 0; i < Peliculas.Count; i++)
+            {
+                <div>
+                    @if (i == Peliculas.Count - 1)
+                    {
+                        <p>Esta es la última película</p>
+                    }
+                    <p>@(i + 1)) Título: @((MarkupString)Peliculas[i].Titulo)</p>
+                    <p>Fecha Lanzamiento: <b>@Peliculas[i].Lanzamiento.ToString("dd MMM yyyy")</b></p>
+                </div>
+            }
+        }
+    </div>
+
+@code {
+    string nombre = "Felipe";
+
+    protected override async Task OnInitializedAsync()
+    {
+        //await Task.Delay(3000);
+        Peliculas = ObtenerPeliculas();
+    }
+
+    public Pelicula SpiderMan { get { return ObtenerPelicula(); } }
+    public List<Pelicula> Peliculas;
+
+    private Pelicula ObtenerPelicula()
+    {
+        return new Pelicula()
+        {
+            Titulo = "Spider-Man: Far From Home",
+            Lanzamiento = new DateTime(2019, 7, 2)
+        };
+    }
+
+    private List<Pelicula> ObtenerPeliculas()
+    {
+        return new List<Pelicula>()
+        {
+            new Pelicula(){Titulo = "<b>Spider-Man</b>: Far From Home", Lanzamiento  = new DateTime(2019, 7, 2)},
+            new Pelicula(){Titulo = "<i>Moana</i>", Lanzamiento  = new DateTime(2016, 11, 23)},
+            new Pelicula(){Titulo = "Inception", Lanzamiento  = new DateTime(2010, 7, 16)}
+        };
+    }
+
+    private void ManejarClick()
+    {
+        Console.WriteLine("Me han clickeado (desde metodo)!");
+    }
+}
