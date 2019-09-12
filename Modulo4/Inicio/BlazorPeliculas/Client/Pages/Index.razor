@@ -1,0 +1,49 @@
+﻿@page "/"
+@inject ServicioSingleton singleton
+@inject IRepositorio  repositorio
+@using static BlazorPeliculas.Client.Shared.MainLayout
+
+<p style="color: @appState.Color">El valor del singleton es: @singleton.Valor</p>
+
+<div>
+    <h3>Peliculas</h3>
+    <ListadoPeliculas  Peliculas="Peliculas" />
+</div>
+
+<button @onclick="AgregarPelicula">Agregar Pelicula</button>
+
+@code {
+    string nombre = "Felipe";
+    [CascadingParameter] private AppState appState { get; set; }
+
+    private List<Pelicula> Peliculas;
+
+    protected override void OnInitialized()
+    {
+        Peliculas = repositorio.ObtenerPeliculas();
+    }
+
+    void AgregarPelicula()
+    {
+        Peliculas.Add(new Pelicula() { Titulo = "Nueva Pelicula", Lanzamiento = DateTime.Today });
+    }
+
+    public Pelicula SpiderMan { get { return ObtenerPelicula(); } }
+
+
+    private Pelicula ObtenerPelicula()
+    {
+        return new Pelicula()
+        {
+            Titulo = "Spider-Man: Far From Home",
+            Lanzamiento = new DateTime(2019, 7, 2)
+        };
+    }
+
+
+
+    private void ManejarClick()
+    {
+        Console.WriteLine("Me han clickeado (desde metodo)!");
+    }
+}
