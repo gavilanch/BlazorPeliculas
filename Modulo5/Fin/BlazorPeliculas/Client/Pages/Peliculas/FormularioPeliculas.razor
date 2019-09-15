@@ -44,7 +44,22 @@
                                   NoSeleccionados="NoSeleccionados"></SelectorMultiple>
             </div>
         </div>
-
+        <div class="form-group">
+            <label>Actores:</label>
+            <div>
+                <SelectorMultipleTypeahead Context="persona"
+                                           SearchMethod="BuscarActores" 
+                                           ElementosSeleccionados="ActoresSeleccionados">
+                    <MyListTemplate>
+                        @persona.Nombre
+                    </MyListTemplate>
+                    <MyResultTemplate>
+                        <img style="width: 50px" src="@persona.Foto" />
+                        @persona.Nombre
+                    </MyResultTemplate>
+                </SelectorMultipleTypeahead>
+            </div>
+        </div>
 
         <button type="submit" class="btn btn-success">Salvar Película</button>
     </EditForm>
@@ -54,6 +69,7 @@
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public List<Genero> GenerosSeleccionados { get; set; } = new List<Genero>();
     [Parameter] public List<Genero> GenerosNoSeleccionados { get; set; } = new List<Genero>();
+    [Parameter] public List<Persona> ActoresSeleccionados { get; set; } = new List<Persona>();
 
     private List<SelectorMultipleModel> Seleccionados { get; set; } = new List<SelectorMultipleModel>();
     private List<SelectorMultipleModel> NoSeleccionados { get; set; } = new List<SelectorMultipleModel>();
@@ -73,5 +89,14 @@
     private void ImagenSeleccionada(string imagenBase64)
     {
         Pelicula.Poster = imagenBase64;
+    }
+
+    private async Task<IEnumerable<Persona>> BuscarActores(string searchText)
+    {
+        return new List<Persona>()
+        {
+            new Persona(){Id=1, Nombre="Tom Holland", Foto = "https://m.media-amazon.com/images/M/MV5BNTAzMzA3NjQwOF5BMl5BanBnXkFtZTgwMDUzODQ5MTI@._V1_UY317_CR23,0,214,317_AL_.jpg"},
+            new Persona(){Id=2, Nombre="Tom Hanks", Foto = "https://m.media-amazon.com/images/M/MV5BMTQ2MjMwNDA3Nl5BMl5BanBnXkFtZTcwMTA2NDY3NQ@@._V1_UY317_CR2,0,214,317_AL_.jpg"}
+        };
     }
 }
