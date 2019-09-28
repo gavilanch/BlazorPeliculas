@@ -1,0 +1,49 @@
+﻿@page "/usuarios"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+
+<h3>Indice Usuarios</h3>
+
+<ListadoGenerico Listado="Usuarios">
+    <HayRegistrosCompleto>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Usuario</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var usuario in Usuarios)
+                {
+                    <tr>
+                        <td>
+                            <a href="/usuarios/editar/@usuario.UserId" class="btn btn-success">Editar</a>
+                        </td>
+                        <td>
+                            @usuario.Email
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </HayRegistrosCompleto>
+</ListadoGenerico>
+
+@code {
+    List<UsuarioDTO> Usuarios;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var httpResponse = await repositorio.Get<List<UsuarioDTO>>("api/usuarios");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            Usuarios = httpResponse.Response;
+        }
+    }
+}

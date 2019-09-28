@@ -1,0 +1,70 @@
+﻿@page "/usuarios/editar/{UserId}"
+
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+
+<h3>Editar Usuario</h3>
+
+<select @bind="rolSeleccionado">
+    <option>--Seleccione un rol--</option>
+    @foreach (var rol in roles)
+    {
+        <option value="@rol.Nombre">@rol.Nombre</option>
+    }
+</select>
+
+<button @onclick="AsignarRol">Asignar Rol</button>
+<button @onclick="RemoverRol">Remover Rol</button>
+
+@code {
+    [Parameter] public string UserId { get; set; }
+    private List<RolDTO> roles = new List<RolDTO>();
+    private string rolSeleccionado;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var httpResponse = await repositorio.Get<List<RolDTO>>("api/usuarios/roles");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            roles = httpResponse.Response;
+        }
+    }
+
+    private async Task AsignarRol()
+    {
+        await EditarRol("api/usuarios/asignarRol");
+    }
+
+    private async Task RemoverRol()
+    {
+        await EditarRol("api/usuarios/removerRol");
+    }
+
+    private async Task EditarRol(string url)
+    {
+
+        if (rolSeleccionado == null)
+        {
+            await mostrarMensajes.MostrarMensajeError("Debe seleccionar un rol");
+            return;
+        }
+
+        var rolDTO = new EditarRolDTO() { RoleId = rolSeleccionado, UserId = UserId };
+
+        var httpResponse = await repositorio.Post<EditarRolDTO>(url, rolDTO);
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            await mostrarMensajes.MostrarMensajeExitoso("Operación realizada");
+        }
+    }
+}
