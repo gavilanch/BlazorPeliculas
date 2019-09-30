@@ -5,7 +5,7 @@
 <div style="display: flex; flex-wrap: wrap; align-items: center;">
     <ListadoGenerico Listado="Peliculas">
         <HayRegistros Context="pelicula">
-            <PeliculaIndividual Pelicula="pelicula" EliminarPelicula="EliminarPelicula" />
+            <PeliculaIndividual Pelicula="pelicula" EliminarPelicula="EliminarPelicula" @key="pelicula.Id" />
         </HayRegistros>
     </ListadoGenerico>
 </div>
