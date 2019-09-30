@@ -4,6 +4,9 @@
 
 <h3>Indice Usuarios</h3>
 
+<Paginacion PaginaActual="paginaActual" PaginaSeleccionada="paginaSeleccionada"
+            PaginasTotales="paginasTotales"></Paginacion>
+
 <ListadoGenerico Listado="Usuarios">
     <HayRegistrosCompleto>
         <table class="table">
@@ -33,9 +36,23 @@
 @code {
     List<UsuarioDTO> Usuarios;
 
+    private int paginaActual = 1;
+    private int paginasTotales;
+
+    private async Task paginaSeleccionada(int pagina)
+    {
+        paginaActual = pagina;
+        await Cargar(pagina);
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        var httpResponse = await repositorio.Get<List<UsuarioDTO>>("api/usuarios");
+        await Cargar();
+    }
+
+    private async Task Cargar(int pagina = 1)
+    {
+        var httpResponse = await repositorio.Get<List<UsuarioDTO>>($"api/usuarios?pagina={pagina}");
 
         if (httpResponse.Error)
         {
@@ -43,6 +60,7 @@
         }
         else
         {
+            paginasTotales = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPaginas").FirstOrDefault());
             Usuarios = httpResponse.Response;
         }
     }
