@@ -1,0 +1,36 @@
+﻿@page "/generos/editar/{GeneroId:int}"
+@inject RepositorioGeneros repositorio
+@inject IMostrarMensajes mostrarMensaje
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "admin")]
+
+<h3>Editar Género</h3>
+
+@if (Genero == null)
+{
+    <text>Cargando...</text>
+}
+else
+{
+    <FormularioGenero OnValidSubmit="Editar" Genero="Genero" />
+}
+
+@code {
+    [Parameter] public int GeneroId { get; set; }
+    private Genero Genero;
+
+    protected async override Task OnInitializedAsync()
+    {
+        Genero = await repositorio.Get(GeneroId);
+        if (Genero == null)
+        {
+            navigationManager.NavigateTo("generos");
+        }
+    }
+
+    private async Task Editar()
+    {
+        await repositorio.Put(Genero);
+        navigationManager.NavigateTo("generos");
+    }
+}

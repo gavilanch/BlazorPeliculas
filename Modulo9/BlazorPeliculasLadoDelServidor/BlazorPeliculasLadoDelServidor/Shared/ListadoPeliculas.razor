@@ -1,0 +1,26 @@
+﻿@inject IJSRuntime js
+@inject RepositorioPeliculas repositorio
+@inject IMostrarMensajes mostrarMensajes
+
+<div style="display: flex; flex-wrap: wrap; align-items: center;">
+    <ListadoGenerico Listado="Peliculas">
+        <HayRegistros Context="pelicula">
+            <PeliculaIndividual Pelicula="pelicula" EliminarPelicula="EliminarPelicula" @key="pelicula.Id" />
+        </HayRegistros>
+    </ListadoGenerico>
+</div>
+
+
+@code {
+    [Parameter] public List<Pelicula> Peliculas { get; set; }
+
+    async Task EliminarPelicula(Pelicula pelicula)
+    {
+        var confirmar = await js.Confirm($"¿Desea borrar la película {pelicula.Titulo}?");
+        if (confirmar)
+        {
+            await repositorio.Delete(pelicula.Id);
+            Peliculas.Remove(pelicula);
+        }
+    }
+}

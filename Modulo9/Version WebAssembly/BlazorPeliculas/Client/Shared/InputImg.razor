@@ -1,0 +1,54 @@
+﻿@using W8lessLabs.Blazor.LocalFiles
+<div>
+    <label>@Label</label>
+    <div>
+        <button type="button" @onclick="SeleccionarImagen">Seleccionar Imagen</button>
+        <FileSelect @ref="imagenFileSelect" Accept=".jpg,.jpeg,.png"></FileSelect>
+    </div>
+</div>
+<div>
+    @if (imagenBase64 != null)
+    {
+        <div>
+            <div style="margin:10px;">
+                <img src="data:image/jpeg;base64, @imagenBase64" style="width: 400px;" />
+            </div>
+        </div>
+    }
+    @if (ImagenTemporal != null)
+    {
+        <div>
+            <div style="margin:10px;">
+                <img src="@ImagenTemporal" style="width: 400px;" />
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = "Imagen";
+    [Parameter] public string ImagenTemporal { get; set; }
+    [Parameter] public EventCallback<string> ImagenSeleccionada { get; set; }
+    private string imagenBase64;
+    private FileSelect imagenFileSelect;
+
+    private void SeleccionarImagen()
+    {
+        imagenFileSelect.SelectFiles(ImagenFileSelected);
+    }
+
+    async Task ImagenFileSelected(SelectedFile[] selectedFiles)
+    {
+        var selectedFile = selectedFiles.FirstOrDefault();
+
+        using (var fileReader = imagenFileSelect.GetFileReader(selectedFile))
+        {
+            var imagesBytes = await fileReader.GetFileBytesAsync();
+            imagenBase64 = Convert.ToBase64String(imagesBytes);
+            await ImagenSeleccionada.InvokeAsync(imagenBase64);
+            ImagenTemporal = null;
+            StateHasChanged();
+        }
+    }
+
+}

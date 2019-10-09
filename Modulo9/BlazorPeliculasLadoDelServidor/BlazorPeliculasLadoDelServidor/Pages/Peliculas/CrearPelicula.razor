@@ -1,0 +1,37 @@
+﻿@page "/peliculas/crear"
+@inject NavigationManager navigationManager
+@inject RepositorioPeliculas repositorio
+@inject RepositorioGeneros repositorioGeneros
+@inject IMostrarMensajes mostrarMensajes
+@attribute [Authorize(Roles = "admin")]
+
+<h3>Crear Pelicula</h3>
+
+@if (MostrarFormulario)
+{
+    <FormularioPeliculas Pelicula="Pelicula" OnValidSubmit="Crear"
+                         GenerosNoSeleccionados="GenerosNoSeleccionados"></FormularioPeliculas>
+}
+else
+{
+    <text>Cargando...</text>
+}
+
+@code {
+    private bool MostrarFormulario { get; set; } = false;
+    private Pelicula Pelicula = new Pelicula();
+    private List<Genero> GenerosNoSeleccionados = new List<Genero>();
+
+    protected async override Task OnInitializedAsync()
+    {
+        GenerosNoSeleccionados = await repositorioGeneros.Get();
+        MostrarFormulario = true;
+    }
+
+    async Task Crear()
+    {
+        var PeliculaId = await repositorio.Post(Pelicula);
+        navigationManager.NavigateTo($"/pelicula/{PeliculaId}/{Pelicula.Titulo.Replace(" ", "-")}");
+    }
+
+}
