@@ -31,6 +31,7 @@ namespace BlazorPeliculas.Server
             services.AddAutoMapper(typeof(Startup));
 
             services.AddScoped<IAlmacenadorDeArchivos, AlmacenadorArchivosAzStorage>();
+            services.AddHttpContextAccessor();
 
             services.AddMvc().AddNewtonsoftJson(options => 
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);

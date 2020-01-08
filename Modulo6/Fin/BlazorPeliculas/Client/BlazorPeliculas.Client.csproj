@@ -13,6 +13,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Blazor.Build" Version="3.1.0-preview4.19579.2" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor.HttpClient" Version="3.1.0-preview4.19579.2" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor.DevServer" Version="3.1.0-preview4.19579.2" PrivateAssets="all" />
+    <PackageReference Include="Tewr.Blazor.FileReader" Version="1.2.0.19363" />
     <PackageReference Include="W8lessLabs.Blazor.LocalFiles" Version="0.7.0" />
   </ItemGroup>
   <ItemGroup>
