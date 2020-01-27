@@ -14,5 +14,19 @@ namespace BlazorPeliculas.Shared.Entidades
         public string Foto { get; set; }
         [Required]
         public DateTime? FechaNacimiento { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Persona p2)
+            {
+                return Id == p2.Id;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }
