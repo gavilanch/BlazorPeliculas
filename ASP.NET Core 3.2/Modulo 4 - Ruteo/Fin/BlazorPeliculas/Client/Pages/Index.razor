@@ -1,0 +1,18 @@
+﻿@page "/"
+@page "/index"
+
+@inject IRepositorio  repositorio
+
+<div>
+    <h3>Peliculas</h3>
+    <ListadoPeliculas Peliculas="Peliculas" />
+</div>
+
+@code {
+    private List<Pelicula> Peliculas;
+
+    protected override void OnInitialized()
+    {
+        Peliculas = repositorio.ObtenerPeliculas();
+    }
+}

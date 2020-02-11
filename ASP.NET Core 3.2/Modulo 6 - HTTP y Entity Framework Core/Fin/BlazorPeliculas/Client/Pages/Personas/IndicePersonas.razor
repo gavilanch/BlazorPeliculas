@@ -1,0 +1,79 @@
+﻿@page "/personas"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+
+<h3>Indice Personas</h3>
+
+<div class="form-group">
+    <a class="btn btn-info" href="personas/crear">Crear Persona</a>
+</div>
+
+<Paginacion PaginaActual="paginaActual" PaginaSeleccionada="paginaSeleccionada"
+            PaginasTotales="paginasTotales"></Paginacion>
+
+<ListadoGenerico Listado="Personas">
+    <HayRegistrosCompleto>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Nombre</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Personas)
+                {
+                    <tr>
+                        <td>
+                            <a href="personas/editar/@item.Id" class="btn btn-success">Editar</a>
+                            <button @onclick="@(() => BorrarPersona(item))" class="btn btn-danger">Borrar</button>
+                        </td>
+                        <td>@item.Nombre</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </HayRegistrosCompleto>
+</ListadoGenerico>
+
+@code {
+    public List<Persona> Personas { get; set; }
+    private int paginaActual = 1;
+    private int paginasTotales;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Cargar();
+    }
+
+    private async Task paginaSeleccionada(int pagina)
+    {
+        paginaActual = pagina;
+        await Cargar(pagina);
+    }
+
+    private async Task Cargar(int pagina = 1)
+    {
+        var responseHttp = await repositorio.Get<List<Persona>>($"api/personas?pagina={pagina}");
+        if (!responseHttp.Error)
+        {
+            Personas = responseHttp.Response;
+            var conteo = responseHttp.HttpResponseMessage.Headers.GetValues("conteo").FirstOrDefault();
+            paginasTotales = int.Parse(responseHttp.HttpResponseMessage.Headers.GetValues("totalPaginas").FirstOrDefault());
+        }
+    }
+
+    private async Task BorrarPersona(Persona persona)
+    {
+        var responseHttp = await repositorio.Delete($"api/personas/{persona.Id}");
+        if (responseHttp.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await responseHttp.GetBody());
+        }
+        else
+        {
+            await Cargar();
+        }
+
+    }
+}
