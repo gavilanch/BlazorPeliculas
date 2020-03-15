@@ -1,0 +1,55 @@
+﻿<EditForm Model="Persona" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label>Nombre:</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Persona.Nombre" />
+            <ValidationMessage For="@(() => Persona.Nombre)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Fecha Nacimiento:</label>
+        <div>
+            <InputDate class="form-control" @bind-Value="@Persona.FechaNacimiento" />
+            <ValidationMessage For="@(() => Persona.FechaNacimiento)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <InputImg Label="Foto" ImagenSeleccionada="ImagenSeleccionada" ImagenTemporal="@imagenTemporal" />
+    </div>
+    <div class="form-group form-markdown">
+        <InputMarkdown @bind-Value="@Persona.Biografia"
+                       For="@(() => Persona.Biografia)"
+                       Label="Biografía" />
+    </div>
+
+    <button class="btn btn-success" type="submit">Guardar Cambios</button>
+</EditForm>
+
+
+@code {
+    [Parameter] public Persona Persona { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    private string imagenTemporal;
+
+    protected override void OnInitialized()
+    {
+        Console.WriteLine("on initialized");
+        Console.WriteLine(Persona.Foto);
+        Console.WriteLine(Persona.Nombre);
+
+        if (!string.IsNullOrWhiteSpace(Persona.Foto))
+        {
+            imagenTemporal = Persona.Foto;
+            Console.WriteLine(imagenTemporal);
+            Persona.Foto = null;
+        }
+    }
+
+    private void ImagenSeleccionada(string imagenBase64)
+    {
+        Persona.Foto = imagenBase64;
+        imagenTemporal = null;
+    }
+}
