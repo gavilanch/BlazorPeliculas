@@ -29,6 +29,19 @@ namespace BlazorPeliculas.Server.Helpers
             var usuario = await userManager.FindByIdAsync(usuarioId);
             var claimsPrincipal = await claimsFactory.CreateAsync(usuario);
             var claims = claimsPrincipal.Claims.ToList();
+
+            var claimsMapeados = new List<Claim>();
+
+            foreach (var claim in claims)
+            {
+                if (claim.Type == JwtClaimTypes.Role)
+                {
+                    claimsMapeados.Add(new Claim(ClaimTypes.Role, claim.Value));
+                }
+            }
+
+            claims.AddRange(claimsMapeados);
+
             context.IssuedClaims = claims;
         }
 
