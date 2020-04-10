@@ -38,6 +38,8 @@ namespace BlazorPeliculas.Client
                 provider => provider.GetRequiredService<ProveedorAutenticacionJWT>());
             services.AddScoped<ILoginService, ProveedorAutenticacionJWT>(
                 provider => provider.GetRequiredService<ProveedorAutenticacionJWT>());
+
+            services.AddScoped<RenovadorToken>();
         }
     }
 }

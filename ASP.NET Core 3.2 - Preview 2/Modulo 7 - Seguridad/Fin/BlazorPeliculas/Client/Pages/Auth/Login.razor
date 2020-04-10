@@ -45,7 +45,7 @@
         }
         else
         {
-            await loginService.Login(httpResponse.Response.Token);
+            await loginService.Login(httpResponse.Response);
             navigationManager.NavigateTo("");
         }
     }
