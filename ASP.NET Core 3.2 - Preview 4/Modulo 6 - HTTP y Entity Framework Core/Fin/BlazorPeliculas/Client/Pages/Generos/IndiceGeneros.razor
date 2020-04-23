@@ -1,0 +1,62 @@
+﻿@page "/generos"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+
+<h3>Indice Géneros</h3>
+
+<div class="form-group">
+    <a class="btn btn-info" href="generos/crear">Agregar Género</a>
+</div>
+
+<ListadoGenerico Listado="Generos">
+    <HayRegistrosCompleto>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Nombre</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Generos)
+                {
+                    <tr>
+                        <td>
+                            <a href="/generos/editar/@item.Id" class="btn btn-success">Editar</a>
+                            <button @onclick="@(() => BorrarGenero(item))" class="btn btn-danger">Borrar</button>
+                        </td>
+                        <td>@item.Nombre</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </HayRegistrosCompleto>
+</ListadoGenerico>
+
+@code {
+    public List<Genero> Generos { get; set; }
+    protected async override Task OnInitializedAsync()
+    {
+        await Cargar();
+    }
+
+    private async Task Cargar()
+    {
+        var responseHttp = await repositorio.Get<List<Genero>>("api/generos");
+        Generos = responseHttp.Response;
+    }
+
+    private async Task BorrarGenero(Genero genero)
+    {
+        var responseHttp = await repositorio.Delete($"api/generos/{genero.Id}");
+        if (responseHttp.Error)
+        {
+           await mostrarMensajes.MostrarMensajeError(await responseHttp.GetBody());
+        }
+        else
+        {
+            await Cargar();
+        }
+
+    }
+}

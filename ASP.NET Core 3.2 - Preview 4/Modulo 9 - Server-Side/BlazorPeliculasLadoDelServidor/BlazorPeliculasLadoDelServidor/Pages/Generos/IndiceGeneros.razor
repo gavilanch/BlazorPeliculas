@@ -1,0 +1,54 @@
+﻿@page "/generos"
+@inject RepositorioGeneros repositorio
+@inject IMostrarMensajes mostrarMensajes
+@attribute [Authorize(Roles = "admin")]
+
+<h3>Indice Géneros</h3>
+
+<div class="form-group">
+    <a class="btn btn-info" href="generos/crear">Agregar Género</a>
+</div>
+
+<ListadoGenerico Listado="Generos">
+    <HayRegistrosCompleto>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Nombre</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Generos)
+                {
+                    <tr>
+                        <td>
+                            <a href="/generos/editar/@item.Id" class="btn btn-success">Editar</a>
+                            <button @onclick="@(() => BorrarGenero(item))" class="btn btn-danger">Borrar</button>
+                        </td>
+                        <td>@item.Nombre</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </HayRegistrosCompleto>
+</ListadoGenerico>
+
+@code {
+    public List<Genero> Generos { get; set; }
+    protected async override Task OnInitializedAsync()
+    {
+        await Cargar();
+    }
+
+    private async Task Cargar()
+    {
+        Generos = await repositorio.Get();
+    }
+
+    private async Task BorrarGenero(Genero genero)
+    {
+        await repositorio.Delete(genero.Id);
+        await Cargar();
+    }
+}

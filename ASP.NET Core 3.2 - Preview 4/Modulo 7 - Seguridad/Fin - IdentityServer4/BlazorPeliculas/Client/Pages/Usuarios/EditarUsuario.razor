@@ -1,0 +1,71 @@
+﻿@page "/usuarios/editar/{UserId}"
+
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+
+<h3>Editar Usuario</h3>
+
+<div class="form-inline">
+
+    <select class="form-control mb-2 mr-sm-2" @bind="rolSeleccionado">
+        <option value="0">--Seleccione un rol--</option>
+        @foreach (var rol in roles)
+        {
+            <option value="@rol.Nombre">@rol.Nombre</option>
+        }
+    </select>
+
+    <button  class="btn btn-info mb-2 mr-sm-2" @onclick="AsignarRol">Asignar Rol</button>
+    <button class="btn btn-danger mb-2 mr-sm-2" @onclick="RemoverRol">Remover Rol</button>
+</div>
+    @code {
+        [Parameter] public string UserId { get; set; }
+        private List<RolDTO> roles = new List<RolDTO>();
+        private string rolSeleccionado = "0";
+
+        protected override async Task OnInitializedAsync()
+        {
+            var httpResponse = await repositorio.Get<List<RolDTO>>("api/usuarios/roles");
+
+            if (httpResponse.Error)
+            {
+                await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+            }
+            else
+            {
+                roles = httpResponse.Response;
+            }
+        }
+
+        private async Task AsignarRol()
+        {
+            await EditarRol("api/usuarios/asignarRol");
+        }
+
+        private async Task RemoverRol()
+        {
+            await EditarRol("api/usuarios/removerRol");
+        }
+
+        private async Task EditarRol(string url)
+        {
+            if (rolSeleccionado == "0")
+            {
+                await mostrarMensajes.MostrarMensajeError("Debe seleccionar un rol");
+                return;
+            }
+
+            var rolDTO = new EditarRolDTO() { RoleId = rolSeleccionado, UserId = UserId };
+
+            var httpResponse = await repositorio.Post<EditarRolDTO>(url, rolDTO);
+
+            if (httpResponse.Error)
+            {
+                await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+            }
+            else
+            {
+                await mostrarMensajes.MostrarMensajeExitoso("Operación realizada");
+            }
+        }
+    }
