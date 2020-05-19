@@ -1,0 +1,48 @@
+﻿@*Modificación del componente de typeahead de Chris Sainty*@
+
+@typeparam TItem
+@inherits CustomTypeaheadBase<TItem>
+
+<div class="blazored-typeahead" @ref="typeahead">
+    <div class="blazored-typeahead__controls">
+        <input @ref="searchInput"
+               class="blazored-typeahead__input"
+               @bind-value="@SearchText"
+               @bind-value:event="oninput"
+               @onclick="@ShowSuggestions"
+               type="text"
+               autocomplete="off"
+               placeholder="@Placeholder" />
+    </div>
+    @if (ShouldShowSuggestions())
+    {
+        <div class="blazored-typeahead__results">
+            @foreach (var item in Suggestions)
+            {
+                <div @key="item" class="blazored-typeahead__result @GetSelectedSuggestionClass(item)" tabindex="0" @onclick="@(() => SelectResult(item))" @onkeyup="((e) => HandleKeyUpOnSuggestion(e,item))">
+                    @if (ResultTemplate != null)
+                    {
+                        @ResultTemplate(item)
+                    }
+                </div>
+            }
+        </div>
+    }
+    else if (ShowNotFound())
+    {
+        <div class="blazored-typeahead__results">
+            @if (NotFoundTemplate != null)
+            {
+                <div class="blazored-typeahead__notfound">
+                    @NotFoundTemplate
+                </div>
+            }
+            else
+            {
+                <div class="blazored-typeahead__notfound">
+                    No Results Found
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,19 @@
+﻿@page "/personas/crear"
+@inject RepositorioPersonas repositorio
+@inject NavigationManager navigationManager
+@inject IMostrarMensajes mostrarMensajes
+@attribute [Authorize(Roles = "admin")]
+
+<h3>Crear Persona</h3>
+
+<FormularioPersonas OnValidSubmit="Crear" Persona="Persona" />
+
+@code {
+    private Persona Persona = new Persona();
+
+    async Task Crear()
+    {
+        await repositorio.Post(Persona);
+        navigationManager.NavigateTo("/personas");
+    }
+}
