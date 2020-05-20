@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject BlazorPeliculas.Client.Auth.RenovadorToken renovadorToken
+@inject IJSRuntime js
+@inject NavigationManager navigationManager
 
 <div class="sidebar">
     <NavMenu />
@@ -17,8 +19,21 @@
 </div>
 
 @code{
-    protected override void OnInitialized()
+    [CascadingParameter] public Task<AuthenticationState> AuthenticationState { get; set; }
+
+    protected override async Task OnInitializedAsync()
     {
+        await js.InicializarTimerInactivo(DotNetObjectReference.Create(this));
         renovadorToken.Iniciar();
+    }
+
+    [JSInvokable]
+    public async Task Logout()
+    {
+        var authState = await AuthenticationState;
+        if (authState.User.Identity.IsAuthenticated)
+        {
+            navigationManager.NavigateTo("logout");
+        }
     }
 }
