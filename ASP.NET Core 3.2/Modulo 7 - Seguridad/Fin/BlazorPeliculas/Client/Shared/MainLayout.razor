@@ -33,7 +33,8 @@
         var authState = await AuthenticationState;
         if (authState.User.Identity.IsAuthenticated)
         {
-            navigationManager.NavigateTo("logout");
+            // Descomentar para activar deslogueo automático
+            //navigationManager.NavigateTo("logout");
         }
     }
 }
