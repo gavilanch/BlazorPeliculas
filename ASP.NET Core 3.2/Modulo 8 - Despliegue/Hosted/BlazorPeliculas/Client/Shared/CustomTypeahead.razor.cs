@@ -53,7 +53,6 @@ namespace BlazorPeliculas.Client.Shared
 
         private Timer _debounceTimer;
         private string _searchText = string.Empty;
-        private bool _firstRender = true; // remove in preview 9
 
         protected override void OnInitialized()
         {
