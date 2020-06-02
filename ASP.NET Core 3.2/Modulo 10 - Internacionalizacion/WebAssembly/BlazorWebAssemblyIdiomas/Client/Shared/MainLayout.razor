@@ -1,0 +1,23 @@
+﻿@inherits LayoutComponentBase
+@using System.Globalization
+
+<div class="sidebar">
+    <NavMenu />
+</div>
+
+<div class="main">
+    <div class="top-row px-4">
+        <SelectorCultura />
+    </div>
+
+    <div class="content px-4">
+        @Body
+    </div>
+</div>
+
+@code{
+    protected override void OnInitialized()
+    {
+        CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
+    }
+}

@@ -1,0 +1,18 @@
+﻿@page "/formulario"
+
+<h3>Formulario</h3>
+
+<EditForm Model="persona">
+    <DataAnnotationsValidator />
+    <div>
+        Nombre:
+        <InputText @bind-Value="persona.Nombre" />
+        <ValidationMessage For="@(() => persona.Nombre)" />
+    </div>
+    <button>Enviar</button>
+
+</EditForm>
+
+@code {
+    Persona persona = new Persona();
+}
