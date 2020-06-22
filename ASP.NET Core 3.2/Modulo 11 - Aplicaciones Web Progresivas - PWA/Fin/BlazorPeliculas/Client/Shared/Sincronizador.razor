@@ -1,0 +1,92 @@
+﻿@inject IJSRuntime js
+@inject IRepositorio repositorio
+@inject AppState appState
+
+<div style="color: white; margin-bottom: 1em; border-top: 1px solid white;">
+    <div style="margin-left: 5px; margin-top: 5px;">
+        @if (estaSincronizando)
+        {
+            <div>Sincronizando...</div>
+        }
+        else if (huboError)
+        {
+            <div>No ha podido sincronizar</div>
+            <button @onclick="SincronizarClick">Reintentar</button>
+        }
+        else
+        {
+            <div>Sincronizaciones pendientes: @sincronizacionesPendientes</div>
+            @if (sincronizacionesPendientes > 0)
+            {
+                <button @onclick="SincronizarClick">Sincronizar</button>
+            }
+        }
+
+    </div>
+</div>
+
+@code {
+    int sincronizacionesPendientes = 0;
+    bool estaSincronizando = false;
+    bool huboError = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        appState.OnActualizarSincronizacionesPendientes += ActualizarSincronizacionesPendientes;
+        await Sincronizar();
+    }
+
+    private async Task SincronizarClick()
+    {
+        await Sincronizar();
+    }
+
+    public async Task ActualizarSincronizacionesPendientes()
+    {
+        sincronizacionesPendientes = await js.ObtenerCantidadRegistrosPendientes();
+        StateHasChanged();
+    }
+
+    private async Task Sincronizar()
+    {
+        var registrosLocalDb = await js.ObtenerRegistrosPendientes();
+
+        var pendientes = registrosLocalDb.ObtenerPendientes();
+
+        if (pendientes == 0)
+        {
+            return;
+        }
+
+        estaSincronizando = true;
+        StateHasChanged();
+
+        try
+        {
+            foreach (var entidad in registrosLocalDb.ObjetosACrear)
+            {
+                var respuesta = await repositorio.Post(entidad.Url, entidad.Cuerpo);
+                respuesta.HttpResponseMessage.EnsureSuccessStatusCode();
+                await js.BorrarRegistro("crear", entidad.Id);
+            }
+
+            foreach (var entidad in registrosLocalDb.ObjetosABorrar)
+            {
+                var respuesta = await repositorio.Delete(entidad.Url);
+                respuesta.HttpResponseMessage.EnsureSuccessStatusCode();
+                await js.BorrarRegistro("borrar", entidad.Id);
+            }
+
+            huboError = false;
+            sincronizacionesPendientes = 0;
+        }
+        catch (Exception ex)
+        {
+            huboError = true;
+        }
+
+        estaSincronizando = false;
+        StateHasChanged();
+
+    }
+}
