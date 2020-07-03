@@ -19,19 +19,20 @@ namespace BlazorPeliculasLadoDelServidor.Repositorios
         private readonly IAlmacenadorDeArchivos almacenadorDeArchivos;
         private readonly IMapper mapper;
         private readonly UserManager<IdentityUser> userManager;
-        private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly AuthenticationStateService authenticationStateService;
 
         public RepositorioPeliculas(ApplicationDbContext context,
             IAlmacenadorDeArchivos almacenadorDeArchivos,
             IMapper mapper,
             UserManager<IdentityUser> userManager,
-            IHttpContextAccessor httpContextAccessor)
+            AuthenticationStateService authenticationStateService
+            )
         {
             this.context = context;
             this.almacenadorDeArchivos = almacenadorDeArchivos;
             this.mapper = mapper;
             this.userManager = userManager;
-            this.httpContextAccessor = httpContextAccessor;
+            this.authenticationStateService = authenticationStateService;
         }
 
         public async Task<HomePageDTO> Get()
@@ -82,11 +83,10 @@ namespace BlazorPeliculasLadoDelServidor.Repositorios
                 promedioVotos = await context.VotosPeliculas.Where(x => x.PeliculaId == id)
                     .AverageAsync(x => x.Voto);
 
-                if (httpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
-                {
-                    var user = await userManager.FindByEmailAsync(httpContextAccessor.HttpContext.User.Identity.Name);
-                    var userId = user.Id;
+                var userId = await authenticationStateService.GetCurrentUserId();
 
+                if (userId != null)
+                {
                     var votoUsuarioDB = await context.VotosPeliculas
                         .FirstOrDefaultAsync(x => x.PeliculaId == id && x.UserId == userId);
 

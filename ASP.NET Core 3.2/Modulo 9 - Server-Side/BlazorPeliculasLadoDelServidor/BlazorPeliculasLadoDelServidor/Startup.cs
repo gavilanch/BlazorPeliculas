@@ -67,7 +67,8 @@ namespace BlazorPeliculasLadoDelServidor
             services.AddTransient<RepositorioVotos>();
             services.AddScoped<IMostrarMensajes, MostrarMensajes>();
             services.AddScoped<IAlmacenadorDeArchivos, AlmacenadorArchivosAzStorage>();
-            
+            services.AddTransient<AuthenticationStateService>();
+
             services.AddAutoMapper(typeof(Startup));
             services.AddFileReaderService(options => options.InitializeOnFirstCall = true);
         }

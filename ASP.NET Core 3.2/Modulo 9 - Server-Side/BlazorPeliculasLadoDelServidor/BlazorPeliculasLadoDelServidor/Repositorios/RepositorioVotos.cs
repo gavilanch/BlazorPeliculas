@@ -1,5 +1,6 @@
 ﻿using BlazorPeliculasLadoDelServidor.Data;
 using BlazorPeliculasLadoDelServidor.Entidades;
+using BlazorPeliculasLadoDelServidor.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,21 +15,22 @@ namespace BlazorPeliculasLadoDelServidor.Repositorios
     {
         private readonly ApplicationDbContext context;
         private readonly UserManager<IdentityUser> userManager;
-        private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly AuthenticationStateService authenticationStateService;
 
         public RepositorioVotos(ApplicationDbContext context,
             UserManager<IdentityUser> userManager,
-            IHttpContextAccessor httpContextAccessor)
+            AuthenticationStateService authenticationStateService
+            )
         {
             this.context = context;
             this.userManager = userManager;
-            this.httpContextAccessor = httpContextAccessor;
+            this.authenticationStateService = authenticationStateService;
         }
 
         public async Task Votar(VotoPelicula votoPelicula)
         {
-            var user = await userManager.FindByEmailAsync(httpContextAccessor.HttpContext.User.Identity.Name);
-            var userId = user.Id;
+            var userId = await authenticationStateService.GetCurrentUserId();
+
             var votoActual = await context.VotosPeliculas
                 .FirstOrDefaultAsync(x => x.PeliculaId == votoPelicula.PeliculaId && x.UserId == userId);
 
