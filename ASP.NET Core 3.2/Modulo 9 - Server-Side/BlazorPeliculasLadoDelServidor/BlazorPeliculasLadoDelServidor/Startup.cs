@@ -41,14 +41,11 @@ namespace BlazorPeliculasLadoDelServidor
             // En caso de que desees utilizar Azure SignalR
             //services.AddSignalRCore().AddAzureSignalR(Configuration.GetConnectionString("SignalR"));
 
-            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-            optionsBuilder.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("DefaultConnection")), 
+                    ServiceLifetime.Transient);
 
-            services.AddTransient(_ => new ApplicationDbContext(optionsBuilder.Options));
-
-            //services.AddDbContext<ApplicationDbContext>(options =>
-            //    options.UseSqlServer(
-            //        Configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<IdentityUser>()
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
