@@ -12,31 +12,31 @@ namespace BlazorPeliculas.Client.Repositorios
 {
     public class Repositorio : IRepositorio
     {
-        private readonly CustomHttpClientFactory customHttpClientFactory;
+        private readonly HttpClientConToken httpClientConToken;
+        private readonly HttpClientSinToken httpClientSinToken;
 
-        public Repositorio(CustomHttpClientFactory customHttpClientFactory)
+        public Repositorio(HttpClientConToken httpClientConToken, HttpClientSinToken httpClientSinToken)
         {
-            this.customHttpClientFactory = customHttpClientFactory;
+            this.httpClientConToken = httpClientConToken;
+            this.httpClientSinToken = httpClientSinToken;
         }
 
         private JsonSerializerOptions OpcionesPorDefectoJSON =>
             new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
 
-        private async Task<HttpClient> ObtenerHttpClient(bool incluirToken = true)
+        public async Task<HttpResponseWrapper<T>> Get<T>(string url, bool incluirToken = true)
         {
+            HttpClient httpClient;
+
             if (incluirToken)
             {
-                return await customHttpClientFactory.ObtenerHTTPClientConToken();
+                httpClient = httpClientConToken.Client;
             }
             else
             {
-                return customHttpClientFactory.ObtenerHttpClientSinToken();
+                httpClient = httpClientSinToken.Client;
             }
-        }
 
-        public async Task<HttpResponseWrapper<T>> Get<T>(string url, bool incluirToken = true)
-        {
-            var httpClient = await ObtenerHttpClient(incluirToken);
             var responseHTTP = await httpClient.GetAsync(url);
 
             if (responseHTTP.IsSuccessStatusCode)
@@ -52,28 +52,25 @@ namespace BlazorPeliculas.Client.Repositorios
 
         public async Task<HttpResponseWrapper<object>> Post<T>(string url, T enviar)
         {
-            var httpClient = await ObtenerHttpClient();
             var enviarJSON = JsonSerializer.Serialize(enviar);
             var enviarContent = new StringContent(enviarJSON, Encoding.UTF8, "application/json");
-            var responseHttp = await httpClient.PostAsync(url, enviarContent);
+            var responseHttp = await httpClientConToken.Client.PostAsync(url, enviarContent);
             return new HttpResponseWrapper<object>(null, !responseHttp.IsSuccessStatusCode, responseHttp);
         }
 
         public async Task<HttpResponseWrapper<object>> Put<T>(string url, T enviar)
         {
-            var httpClient = await ObtenerHttpClient();
             var enviarJSON = JsonSerializer.Serialize(enviar);
             var enviarContent = new StringContent(enviarJSON, Encoding.UTF8, "application/json");
-            var responseHttp = await httpClient.PutAsync(url, enviarContent);
+            var responseHttp = await httpClientConToken.Client.PutAsync(url, enviarContent);
             return new HttpResponseWrapper<object>(null, !responseHttp.IsSuccessStatusCode, responseHttp);
         }
 
         public async Task<HttpResponseWrapper<TResponse>> Post<T, TResponse>(string url, T enviar)
         {
-            var httpClient = await ObtenerHttpClient();
             var enviarJSON = JsonSerializer.Serialize(enviar);
             var enviarContent = new StringContent(enviarJSON, Encoding.UTF8, "application/json");
-            var responseHttp = await httpClient.PostAsync(url, enviarContent);
+            var responseHttp = await httpClientConToken.Client.PostAsync(url, enviarContent);
             if (responseHttp.IsSuccessStatusCode)
             {
                 var response = await DeserializarRespuesta<TResponse>(responseHttp, OpcionesPorDefectoJSON);
@@ -87,8 +84,7 @@ namespace BlazorPeliculas.Client.Repositorios
 
         public async Task<HttpResponseWrapper<object>> Delete(string url)
         {
-            var httpClient = await ObtenerHttpClient();
-            var responseHTTP = await httpClient.DeleteAsync(url);
+            var responseHTTP = await httpClientConToken.Client.DeleteAsync(url);
             return new HttpResponseWrapper<object>(null, !responseHTTP.IsSuccessStatusCode, responseHTTP);
         }
 

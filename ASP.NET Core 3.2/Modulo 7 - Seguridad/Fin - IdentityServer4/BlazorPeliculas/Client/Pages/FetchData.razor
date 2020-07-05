@@ -1,6 +1,7 @@
 ﻿@page "/fetchdata"
 @using BlazorPeliculas.Shared
-@inject HttpClient Http
+@inject HttpClientConToken Http
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 
 <h1>Weather forecast</h1>
 
@@ -40,6 +41,13 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+        try
+        {
+            forecasts = await Http.Client.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+        }
+        catch (AccessTokenNotAvailableException ex)
+        {
+            ex.Redirect();
+        }
     }
 }
