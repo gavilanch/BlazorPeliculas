@@ -40,13 +40,12 @@
         var enlaceAnteriorHabilitada = PaginaActual != 1;
         var enlaceAnterior = PaginaActual - 1;
         Enlaces.Add(new PaginasModel(enlaceAnterior, enlaceAnteriorHabilitada, "Anterior"));
-
-        for (int i = 1; i <= PaginasTotales; i++)
-        {
-            if (i >= PaginaActual - Radio && i <= PaginaActual + Radio)
-            {
-                Enlaces.Add(new PaginasModel(i) { Activa = PaginaActual == i });
-            }
+        int inicio = PaginaActual-Radio> 0? PaginaActual-Radio : 1;
+        int limite= PaginaActual+Radio<PaginasTotales?
+        PaginaActual+Radio:PaginasTotales;
+        for (int i= inicio ;  i <= limite ; i++)
+        {  
+             Enlaces.Add(new PaginasModel(i) { Activa = PaginaActual == i });
         }
 
         var enlaceSiguienteHabilitada = PaginaActual != PaginasTotales;
