@@ -1,4 +1,4 @@
-# Código fuente de mi curso de Programando en Blazor - ASP.NET Core 3.2
+# Código fuente de mi curso de Programando en Blazor - ASP.NET Core 5
 
 En este curso aprenderás a desarrollar aplicaciones desde cero utilizando Blazor, ASP.NET Core 3.2, y Entity Framework Core 3.1
 
