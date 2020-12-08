@@ -1,0 +1,27 @@
+@inject LazyAssemblyLoader lazyLoader
+@using System.Reflection
+
+<Router AppAssembly="@typeof(Program).Assembly" OnNavigateAsync="OnNavigateAsync"
+        AdditionalAssemblies="assemblies">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <CustomNotFound></CustomNotFound>
+        </LayoutView>
+    </NotFound>
+</Router>
+
+@code {
+    private List<Assembly> assemblies = new List<Assembly>();
+    private async Task OnNavigateAsync(NavigationContext args)
+    {
+        if (args.Path.EndsWith("counter"))
+        {
+            var assembliesCargados = await lazyLoader.LoadAssembliesAsync(
+                new List<string> { "MathNet.Numerics.dll" });
+            assemblies.AddRange(assembliesCargados);
+        }
+    }
+}
