@@ -1,0 +1,34 @@
+﻿@page  "/personas/editar/{PersonaId:int}"
+@inject RepositorioPersonas repositorio
+@inject IMostrarMensajes mostrarMensaje
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "admin")]
+<h3>Editar Persona</h3>
+@if (Persona == null)
+{
+    <text>Cargando...</text>
+}
+else
+{
+    <FormularioPersonas Persona="Persona" OnValidSubmit="Editar" />
+}
+
+@code {
+    [Parameter] public int PersonaId { get; set; }
+    Persona Persona;
+
+    protected async override Task OnInitializedAsync()
+    {
+        Persona = await repositorio.Get(PersonaId);
+        if (Persona == null)
+        {
+            navigationManager.NavigateTo("personas");
+        }
+    }
+
+    private async Task Editar()
+    {
+        await repositorio.Put(Persona);
+        navigationManager.NavigateTo("personas");
+    }
+}

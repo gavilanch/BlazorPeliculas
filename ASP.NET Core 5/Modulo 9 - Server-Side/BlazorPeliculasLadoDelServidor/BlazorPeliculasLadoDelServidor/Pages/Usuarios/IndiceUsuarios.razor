@@ -1,0 +1,59 @@
+﻿@page "/usuarios"
+@inject RepositorioUsuarios repositorio
+@inject IMostrarMensajes mostrarMensajes
+
+<h3>Indice Usuarios</h3>
+
+<Paginacion PaginaActual="paginaActual" PaginaSeleccionada="paginaSeleccionada"
+            PaginasTotales="paginasTotales"></Paginacion>
+
+<ListadoGenerico Listado="Usuarios">
+    <HayRegistrosCompleto>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Usuario</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var usuario in Usuarios)
+                {
+                    <tr>
+                        <td>
+                            <a href="/usuarios/editar/@usuario.UserId" class="btn btn-success">Editar</a>
+                        </td>
+                        <td>
+                            @usuario.Email
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </HayRegistrosCompleto>
+</ListadoGenerico>
+
+@code {
+    List<UsuarioDTO> Usuarios;
+
+    private int paginaActual = 1;
+    private int paginasTotales;
+
+    private async Task paginaSeleccionada(int pagina)
+    {
+        paginaActual = pagina;
+        await Cargar(pagina);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Cargar();
+    }
+
+    private async Task Cargar(int pagina = 1)
+    {
+        var respuestaPaginada = await repositorio.Get(new DTOs.Paginacion { Pagina = pagina });
+        paginasTotales = respuestaPaginada.TotalPaginas;
+        Usuarios = respuestaPaginada.Registros;
+    }
+}
