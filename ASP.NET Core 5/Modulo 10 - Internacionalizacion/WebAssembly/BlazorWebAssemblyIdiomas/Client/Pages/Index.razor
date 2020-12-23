@@ -1,0 +1,16 @@
+﻿@page "/"
+@inject IStringLocalizer<Resource> localizer
+@using System.Globalization
+
+<h1>@localizer["Greeting"]</h1>
+
+@localizer["index.welcome"]
+
+<h4>Fecha Ejemplo: @DateTime.Today</h4>
+<h4>Monto Ejemplo: @precio.ToString("C")</h4>
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+
+@code{
+    decimal precio = 123456.78m;
+}

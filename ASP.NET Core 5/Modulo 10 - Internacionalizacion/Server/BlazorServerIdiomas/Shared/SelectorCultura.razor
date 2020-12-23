@@ -1,0 +1,32 @@
+﻿@inject IJSRuntime js
+@inject NavigationManager navigationManager
+@using System.Globalization
+
+<strong>Cultura:</strong>
+<select @bind="cultura">
+    @foreach (var item in culturas)
+    {
+        <option value="@item">@item.DisplayName</option>
+    }
+</select>
+
+@code {
+    CultureInfo[] culturas = BlazorServerIdiomas.Helpers.Constantes.CulturasSoportadas;
+
+    CultureInfo cultura
+    {
+        get => CultureInfo.CurrentUICulture;
+        set
+        {
+            if (CultureInfo.CurrentUICulture != value)
+            {
+                var cultura = value.Name;
+                var uri = new Uri(navigationManager.Uri)
+                    .GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
+                var query = $"?cultura={Uri.EscapeDataString(cultura)}&redireccionURL={Uri.EscapeDataString(uri)}";
+
+                navigationManager.NavigateTo("/cultura/SetearCultura" + query, forceLoad: true);
+            }
+        }
+    }
+}
