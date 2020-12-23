@@ -1,0 +1,73 @@
+﻿@page "/"
+@page "/index"
+
+@inject IRepositorio  repositorio
+@inject IJSRuntime js
+@inject IMostrarMensajes mostrarMensajes
+
+@if (permisoNotificaciones == "granted")
+{
+    <button @onclick="Desuscribir" class="btn btn-warning">Desactivar Notificación Nuevas Películas</button>
+}
+else if (permisoNotificaciones == "default")
+{
+    <button @onclick="Suscribir" class="btn btn-primary">Activar Notificación Nuevas Películas</button>
+}
+
+<div>
+    <h3>En Cartelera</h3>
+    <ListadoPeliculas Peliculas="EnCartelera" />
+</div>
+
+<div>
+    <h3>Próximos Estrenos</h3>
+    <ListadoPeliculas Peliculas="FuturosEstrenos" />
+</div>
+
+@code {
+    private List<Pelicula> FuturosEstrenos;
+    private List<Pelicula> EnCartelera;
+    private string permisoNotificaciones = string.Empty;
+
+    protected async override Task OnInitializedAsync()
+    {
+        var httpResponse = await repositorio.Get<HomePageDTO>("api/peliculas");
+
+        if (httpResponse.Error)
+        {
+            Console.WriteLine(httpResponse.HttpResponseMessage.StatusCode);
+        }
+        else
+        {
+            FuturosEstrenos = httpResponse.Response.ProximosEstrenos;
+            EnCartelera = httpResponse.Response.PeliculasEnCartelera;
+            permisoNotificaciones = await js.ObtenerEstatusPermisoNotificaciones();
+        }
+    }
+
+    private async Task Suscribir()
+    {
+        var notificacion = await js.SuscribirANotificaciones();
+
+        if (notificacion != null)
+        {
+            await repositorio.Post("api/notificaciones/suscribir", notificacion);
+            permisoNotificaciones = await js.ObtenerEstatusPermisoNotificaciones();
+            await mostrarMensajes.MostrarMensajeExitoso("Vas a recibir una notificación cuando salga una nueva película en cartelera");
+            StateHasChanged();
+        }
+    }
+
+    private async Task Desuscribir()
+    {
+        var notificacion = await js.DesuscribirANotificaciones();
+
+        if (notificacion != null)
+        {
+            await repositorio.Post("api/notificaciones/desuscribir", notificacion);
+            permisoNotificaciones = await js.ObtenerEstatusPermisoNotificaciones();
+            await mostrarMensajes.MostrarMensajeExitoso("Ya no vas a recibir notificaciones");
+            StateHasChanged();
+        }
+    }
+}
