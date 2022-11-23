@@ -1,0 +1,68 @@
+﻿@inject IJSRuntime js
+
+<input type="checkbox" @bind="MostrarBotones" />
+<span>
+    Mostrar botones
+</span>
+
+<ListadoGenerico Listado="Peliculas">
+    <HayRegistros Context="pelicula">
+        <PeliculaIndividual Pelicula="pelicula"
+                            EliminarPelicula="EliminarPelicula"
+                            MostrarBotones="MostrarBotones" />
+    </HayRegistros>
+</ListadoGenerico>
+
+
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public List<Pelicula>? Peliculas { get; set; }
+
+    public void LimpiarPeliculas()
+    {
+        if (Peliculas is not null)
+        {
+            Peliculas.Clear();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        Console.WriteLine($"OnInitialized - Cantidad Peliculas {Peliculas!.Count}");
+    }
+
+    protected override void OnParametersSet()
+    {
+        Console.WriteLine($"OnParametersSet - Cantidad Peliculas {Peliculas!.Count}");
+    }
+
+
+    protected override void OnAfterRender(bool primeraRenderizacion)
+    {
+        Console.WriteLine("OnAfterRender: Primera vez: " + primeraRenderizacion);
+    }
+
+
+    protected override bool ShouldRender()
+    {
+        Console.WriteLine("ShouldRender");
+        return true;
+    }
+
+
+    bool MostrarBotones = true;
+
+    private async Task EliminarPelicula(Pelicula pelicula)
+    {
+        var confirmado = await js.Confirm($"¿Desea borrar la película {pelicula.Titulo}?");
+
+        if (confirmado)
+        {
+            Console.WriteLine("Eliminando una película");
+            Peliculas!.Remove(pelicula);
+        }
+    }
+}
+

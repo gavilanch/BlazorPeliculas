@@ -1,0 +1,41 @@
+﻿@page "/"
+@inject ServicioSingleton singleton
+@inject IRepositorio repositorio
+
+<PageTitle>Blazor Películas</PageTitle>
+
+<HeadContent>
+    <meta name="description" content="Página para visualizar películas" />
+</HeadContent>
+
+<button @onclick="LimpiarPeliculas">Limpiar películas</button>
+
+<p>Valor del singleton: @singleton.Valor</p>
+
+<div>
+    <h3>Películas</h3>
+    <ListadoPeliculas @ref="listadoPeliculas" Peliculas="Peliculas" />
+</div>
+
+<button @onclick="AgregarPelicula">Agregar película</button>
+
+@code {
+
+    public List<Pelicula>? Peliculas { get; set; }
+    public ListadoPeliculas? listadoPeliculas;
+
+    protected override void OnInitialized()
+    {
+        Peliculas = repositorio.ObtenerPeliculas();
+    }
+
+    private void LimpiarPeliculas()
+    {
+        listadoPeliculas!.LimpiarPeliculas();
+    }
+
+    private void AgregarPelicula()
+    {
+        Peliculas!.Add(new Pelicula { Titulo = "Nuevo", FechaLanzamiento = DateTime.Today });
+    }
+}
