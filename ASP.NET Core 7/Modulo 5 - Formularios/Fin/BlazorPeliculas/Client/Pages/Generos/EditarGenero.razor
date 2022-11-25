@@ -1,0 +1,27 @@
+﻿@page "/generos/editar/{GeneroId:int}"
+@inject NavigationManager navigationManager
+
+<h3>Editar Género</h3>
+
+<FormularioGenero @ref="formularioGenero" Genero="Genero" OnValidSubmit="Editar" />
+
+@code {
+    [Parameter] public int GeneroId { get; set; }
+    private Genero? Genero;
+    private FormularioGenero? formularioGenero;
+
+    protected override void OnInitialized()
+    {
+        Genero = new Genero() { Id = GeneroId, Nombre = "Comedia" };
+    }
+
+    private void Editar()
+    {
+        formularioGenero!.FormularioPosteadoConExito = true;
+        Console.WriteLine("Editando Género de Película");
+        Console.WriteLine($"Id: {Genero!.Id}");
+        Console.WriteLine($"Nombre: {Genero.Nombre}");
+        navigationManager.NavigateTo("generos");
+    }
+
+}
