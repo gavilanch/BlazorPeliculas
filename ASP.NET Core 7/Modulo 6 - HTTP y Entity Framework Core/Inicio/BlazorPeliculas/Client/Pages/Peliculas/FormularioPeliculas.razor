@@ -1,0 +1,120 @@
+﻿<EditForm Model="Pelicula" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label>Título:</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Pelicula.Titulo" />
+            <ValidationMessage For="@(() => Pelicula.Titulo)" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label>En cartelera:</label>
+        <div>
+            <InputCheckbox @bind-Value="@Pelicula.EnCartelera" />
+            <ValidationMessage For="@(() => Pelicula.EnCartelera)" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label>Fecha lanzamiento:</label>
+        <div>
+            <InputDate class="form-control" @bind-Value="@Pelicula.Lanzamiento" />
+            <ValidationMessage For="@(() => Pelicula.Lanzamiento)" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <InputImg Label="Poster" ImagenSeleccionada="ImagenSeleccionada" ImagenURL="@imagenURL" />
+    </div>
+
+    <div class="mb-3 form-markdown">
+        <InputMarkdown @bind-Value="@Pelicula.Resumen"
+                       For=@(() => Pelicula.Resumen)
+                       Label="Resumen" />
+    </div>
+
+    <div class="mb-3">
+        <label>Géneros:</label>
+        <div>
+            <SelectorMultiple NoSeleccionados="NoSeleccionados" Seleccionados="Seleccionados">
+
+            </SelectorMultiple>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label>Actores:</label>
+        <div>
+            <SelectorMultipleTypeahead Context="Actor" SearchMethod="BuscarActores"
+                                       ElementosSeleccionados="ActoresSeleccionados">
+                <MyListTemplate>
+                    @Actor.Nombre
+                </MyListTemplate>
+                <MyResultTemplate>
+                    <img style="width: 50px" src="@Actor.Foto" />
+                    @Actor.Nombre
+                </MyResultTemplate>
+            </SelectorMultipleTypeahead>
+        </div>
+    </div>
+
+    <button class="btn btn-success">Guardar Cambios</button>
+
+</EditForm>
+
+
+@code {
+    string? imagenURL;
+
+    [Parameter]
+    [EditorRequired]
+    public Pelicula Pelicula { get; set; } = null!;
+
+    [Parameter]
+    [EditorRequired]
+    public EventCallback OnValidSubmit { get; set; }
+
+    [Parameter]
+    public List<Genero> GenerosSeleccionados { get; set; } = new List<Genero>();
+
+    [Parameter]
+    [EditorRequired]
+    public List<Genero> GenerosNoSeleccionados { get; set; } = new List<Genero>();
+
+    [Parameter]
+    public List<Actor> ActoresSeleccionados { get; set; } = new List<Actor>();
+
+    private List<SelectorMultipleModel> Seleccionados { get; set; } = new List<SelectorMultipleModel>();
+    private List<SelectorMultipleModel> NoSeleccionados { get; set; } = new List<SelectorMultipleModel>();
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(Pelicula.Poster))
+        {
+            imagenURL = Pelicula.Poster;
+            Pelicula.Poster = null;
+        }
+
+        Seleccionados =
+            GenerosSeleccionados.Select(x => new SelectorMultipleModel(x.Id.ToString(), x.Nombre)).ToList();
+
+        NoSeleccionados =
+            GenerosNoSeleccionados.Select(x => new SelectorMultipleModel(x.Id.ToString(), x.Nombre)).ToList();
+    }
+
+    private void ImagenSeleccionada(string imagenBase64)
+    {
+        Pelicula.Poster = imagenBase64;
+        imagenURL = null;
+    }
+
+    private async Task<IEnumerable<Actor>> BuscarActores(string searchText)
+    {
+        return new List<Actor>(){
+            new Actor{Id = 1, Nombre = "Tom Holland", Foto = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Tom_Holland_by_Gage_Skidmore.jpg/1200px-Tom_Holland_by_Gage_Skidmore.jpg"},
+            new Actor{Id = 2, Nombre = "Tom Hanks", Foto = "https://upload.wikimedia.org/wikipedia/commons/a/a9/Tom_Hanks_TIFF_2019.jpg"}
+        };
+    }
+}
