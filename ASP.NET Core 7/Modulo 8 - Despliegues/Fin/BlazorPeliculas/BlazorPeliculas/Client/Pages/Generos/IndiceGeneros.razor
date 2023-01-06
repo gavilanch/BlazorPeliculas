@@ -1,0 +1,77 @@
+﻿@page "/generos"
+@using Microsoft.AspNetCore.Authorization;
+@inject IRepositorio repositorio
+@inject NavigationManager navigationManager
+@inject SweetAlertService swal
+@attribute [Authorize(Roles = "admin")]
+
+<h3>Indice Géneros</h3>
+
+<div class="mb-3">
+    <a class="btn btn-info" href="generos/crear">Agregar género</a>
+</div>
+
+<ListadoGenerico Listado="Generos">
+    <HayRegistrosCompleto>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Nombre</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Generos!)
+                {
+                    <tr>
+                        <td>
+                            <a href="/generos/editar/@item.Id" class="btn btn-success">Editar</a>
+                            <button class="btn btn-danger" 
+                                @onclick=@(() => Borrar(item))>Borrar</button>
+                        </td>
+                        <td>
+                            @item.Nombre
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </HayRegistrosCompleto>
+</ListadoGenerico>
+
+@code {
+    public List<Genero>? Generos { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Cargar();
+    }
+
+    private async Task Cargar()
+    {
+        var respuestaHTTP = await repositorio.Get<List<Genero>>("api/generos");
+        Generos = respuestaHTTP.Response!;
+    }
+
+    private async Task Borrar(Genero genero)
+    {
+        var responseHTTP = await repositorio.Delete($"api/generos/{genero.Id}");
+
+        if (responseHTTP.Error)
+        {
+            if (responseHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/");
+            }
+            else
+            {
+                var mensajeError = await responseHTTP.ObtenerMensajeError();
+                await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            await Cargar();
+        }
+    }
+}

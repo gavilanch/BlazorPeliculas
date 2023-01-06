@@ -1,0 +1,60 @@
+﻿@page "/actores/editar/{ActorId:int}"
+@using Microsoft.AspNetCore.Authorization;
+@inject NavigationManager navigationManager
+@inject IRepositorio repositorio
+@inject SweetAlertService swal
+@attribute [Authorize(Roles = "admin")]
+
+<h3>Editar Actor</h3>
+
+@if (Actor is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <FormularioActores Actor="Actor" OnValidSubmit="Editar" />
+}
+
+@code {
+    [Parameter] public int ActorId { get; set; }
+    Actor? Actor;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine(ActorId);
+        var respuestaHTTP = await repositorio.Get<Actor>($"api/actores/{ActorId}");
+
+        if (respuestaHTTP.Error)
+        {
+            if (respuestaHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("actores");
+            }
+            else
+            {
+                var mensajeError = await respuestaHTTP.ObtenerMensajeError();
+                await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            Actor = respuestaHTTP.Response;
+        }
+    }
+
+    private async Task Editar()
+    {
+        var respuestaHTTP = await repositorio.Put("api/actores", Actor);
+
+        if (respuestaHTTP.Error)
+        {
+            var mensajeError = await respuestaHTTP.ObtenerMensajeError();
+            await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+        }
+        else
+        {
+            navigationManager.NavigateTo("actores");
+        }
+    }
+}

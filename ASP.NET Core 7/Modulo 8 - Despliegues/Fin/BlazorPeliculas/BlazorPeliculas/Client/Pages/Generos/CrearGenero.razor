@@ -1,0 +1,31 @@
+﻿@page "/generos/crear"
+@using Microsoft.AspNetCore.Authorization;
+@inject NavigationManager navigationManager
+@inject IRepositorio repositorio
+@inject SweetAlertService swal
+@attribute [Authorize(Roles = "admin")]
+
+<h3>Crear Género</h3>
+
+<FormularioGenero @ref="formularioGenero" Genero="Genero" OnValidSubmit="Crear" />
+
+@code {
+    private Genero Genero = new Genero();
+    private FormularioGenero? formularioGenero;
+
+    private async Task Crear()
+    {
+        var httpResponse = await repositorio.Post("api/generos", Genero);
+
+        if (httpResponse.Error)
+        {
+            var mensajeError = await httpResponse.ObtenerMensajeError();
+            await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+        }
+        else
+        {
+            formularioGenero!.FormularioPosteadoConExito = true;
+            navigationManager.NavigateTo("generos");
+        }
+    }
+}

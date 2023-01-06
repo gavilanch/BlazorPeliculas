@@ -1,0 +1,96 @@
+﻿@page "/pelicula/{PeliculaId:int}"
+@page "/pelicula/{PeliculaId:int}/{NombrePelicula}"
+@inject IRepositorio repositorio
+@inject SweetAlertService swal
+
+@if (modelo is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <h2>@modelo.Pelicula.Titulo (@modelo.Pelicula.Lanzamiento!.Value.ToString("yyyy"))</h2>
+
+    foreach (var genero in modelo.Generos)
+    {
+        <a class="me-2 badge bg-primary rounded-pill text-decoration-none"
+   href="peliculas/buscar?generoid=@genero.Id">@genero.Nombre</a>
+    }
+
+    <span>
+        | @modelo.Pelicula.Lanzamiento!.Value.ToString("dd MMM yyyy")
+        | Promedio: @modelo.PromedioVotos.ToString("0.#")/5
+        | Tu voto: <Rating MaximoPuntaje="5" PuntajeSeleccionado="modelo.VotoUsuario"
+        OnRating="OnRating"></Rating>
+    </span>
+
+    <div class="d-flex mt-2">
+        <span style="display: inline-block;" class="me-2">
+            <img src="@modelo.Pelicula.Poster" style="width: 225px; height: 315px" />
+        </span>
+
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/@modelo.Pelicula.Trailer" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+
+    <div class="mt-2">
+        <h3>Resumen</h3>
+        <div>
+            <MostrarMarkdown ContenidoMarkdown="@modelo.Pelicula.Resumen"></MostrarMarkdown>
+        </div>
+    </div>
+
+    <div class="mt-2">
+        <h3>Actores</h3>
+        <div class="d-flex flex-column">
+            @foreach (var actor in modelo.Actores)
+            {
+                <div class="mb-2">
+                    <img style="width: 50px;" src="@actor.Foto" />
+                    <span style="display: inline-block; width: 200px">@actor.Nombre</span>
+                    <span style="display: inline-block; width: 45px">...</span>
+                    <span>@actor.Personaje</span>
+                </div>
+            }
+        </div>
+    </div>
+
+}
+
+@code {
+    [Parameter] public int PeliculaId { get; set; }
+    [Parameter] public string NombrePelicula { get; set; } = null!;
+    private PeliculaVisualizarDTO? modelo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var respuestaHTTP = await repositorio
+            .Get<PeliculaVisualizarDTO>($"api/peliculas/{PeliculaId}");
+
+        if (respuestaHTTP.Error)
+        {
+            var mensajeError = await respuestaHTTP.ObtenerMensajeError();
+            await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+        }
+        else
+        {
+            modelo = respuestaHTTP.Response;
+        }
+    }
+
+    private async Task OnRating(int votoSeleccionado)
+    {
+        modelo!.VotoUsuario = votoSeleccionado;
+        var votoPeliculaDTO = new VotoPeliculaDTO() { PeliculaId = PeliculaId, Voto = votoSeleccionado };
+        var respuestaHTTP = await repositorio.Post("api/votos", votoPeliculaDTO);
+
+        if (respuestaHTTP.Error)
+        {
+            var mensajeError = await respuestaHTTP.ObtenerMensajeError();
+            await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+        }
+        else
+        {
+            await swal.FireAsync("Exitoso", "Su voto ha sido recibido", SweetAlertIcon.Success);
+        }
+    }
+}

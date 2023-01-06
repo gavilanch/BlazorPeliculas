@@ -1,0 +1,42 @@
+﻿@inherits LayoutComponentBase
+@inject BlazorPeliculas.Client.Auth.RenovadorToken renovadorToken
+@inject IJSRuntime js
+@inject NavigationManager navigationManager
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <EnlacesAuth />
+            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code{
+    [CascadingParameter] 
+    public Task<AuthenticationState> AuthenticationStateTask { get; set; } = null!;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await js.InvokeVoidAsync("timerInactivo", DotNetObjectReference.Create(this));
+        renovadorToken.Iniciar();
+    }
+
+    [JSInvokable]
+    public async Task Logout()
+    {
+        var authState = await AuthenticationStateTask;
+        if (authState.User.Identity!.IsAuthenticated)
+        {
+            navigationManager.NavigateTo("logout");
+        }
+    }
+}
